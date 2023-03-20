@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 			{
 				// the score for this candidate is the distance to the closest point
 				float score = FLT_MAX;
-				for (int testPointIndex = pointIndex + 1; testPointIndex < points.size(); ++testPointIndex)
+				for (int testPointIndex = candidateIndex + 1; testPointIndex < points.size(); ++testPointIndex)
 					score = std::min(score, DistanceWrap(points[candidateIndex], points[testPointIndex]));
 
 				// the worst candidate is the one with the smallest distance to it's neighbor
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 
 TODO:
 
-! a better algorithm might be to make voronoi cells, and remove the point with the smallest cell?
+! 
  * may not need to explicitly make voronoi, but just make a grid, and keep track of how many grid cells each point "owns" (is the closest point for). Sort from low to high, low is the point to remove.
 
 * read in point set
@@ -173,5 +173,7 @@ TODO:
 
 NOTE:
 * just because BNOT is a great blue noise SET, doesn't mean that turning it into a blue noise sequence would make it better than other blue noise sequences.
+* a better algorithm might be to make voronoi cells, and remove the point with the smallest cell?
+* a better algorithm is probably to do MBC forward... pick a starting one at random, and then choose whichever is farthest from existing points
 
 */
