@@ -92,6 +92,7 @@ int main(int argc, char** argv)
 			}
 		}
 
+		/*
 		// make the points into a sequence instead of a set.
 		// do this by finding the "worst" blue noise point (closest to closest neighbor) and putting it at the end of the sequence.
 		// For ease of implementation, we are going to make the sequence in reverse order though, and then reverse it after.
@@ -116,6 +117,63 @@ int main(int argc, char** argv)
 			}
 
 			// put this candidate at the next step in the sequence
+			std::swap(points[pointIndex], points[worstCandidateIndex]);
+		}
+		std::reverse(points.begin(), points.end());
+		*/
+
+		/*
+		// Make the points into a sequence instead of a set.
+		// Do this by starting with one of the points and doing mitchell's best candidate with the remaining points.
+		// We make the first point in the point set be the first point in the sequence
+		printf("  making sequence\n");
+		{
+			for (int pointIndex = 1; pointIndex < points.size(); ++pointIndex)
+			{
+				int bestCandidateIndex = 0;
+				float bestCandidateScore = 0.0f;
+				for (int candidateIndex = pointIndex; candidateIndex < points.size(); ++candidateIndex)
+				{
+					float candidateScore = FLT_MAX;
+					for (int testPointIndex = 0; testPointIndex < candidateIndex; ++testPointIndex)
+						candidateScore = std::min(candidateScore, DistanceWrap(points[candidateIndex], points[testPointIndex]));
+
+					if (candidateScore > bestCandidateScore)
+					{
+						bestCandidateIndex = candidateIndex;
+						bestCandidateScore = candidateScore;
+					}
+				}
+				std::swap(points[pointIndex], points[bestCandidateIndex]);
+			}
+		}
+		*/
+
+		// Make the points into a sequence instead of a set.
+		// Do this by finding the point with the highest energy and removing it.
+		// We are removing the points in reverse order so will need to reverse the points when we are done.
+		// This is a step from the void and cluster algorithm.
+		printf("  making sequence\n");
+		for (int pointIndex = 0; pointIndex < points.size(); ++pointIndex)
+		{
+			int worstCandidateIndex = 0;
+			float worstCandidateEnergy = 0.0f;
+			for (int candidateIndex = pointIndex; candidateIndex < points.size(); ++candidateIndex)
+			{
+				float candidateEnergy = 0.0f;
+				for (int testPointIndex = pointIndex; testPointIndex < points.size(); ++testPointIndex)
+				{
+					float d = DistanceWrap(points[candidateIndex], points[testPointIndex]);
+					candidateEnergy += std::exp(-(d * d) / 2.0f); // sigma 1.0 gaussian energy function
+				}
+
+				if (candidateEnergy > worstCandidateEnergy)
+				{
+					worstCandidateEnergy = candidateEnergy;
+					worstCandidateIndex = candidateIndex;
+				}
+			}
+
 			std::swap(points[pointIndex], points[worstCandidateIndex]);
 		}
 		std::reverse(points.begin(), points.end());
@@ -158,22 +216,18 @@ int main(int argc, char** argv)
 /*
 
 TODO:
-
-! 
- * may not need to explicitly make voronoi, but just make a grid, and keep track of how many grid cells each point "owns" (is the closest point for). Sort from low to high, low is the point to remove.
-
-* read in point set
-* show it progressively to show it isn't progressive
-* do "void and cluster" logic to remove tightest cluster and put it at the end. repeat until all points removed. this is the sequence!
-* show it progressively again to show it is progressive
 * combine the images together, make a gif, and then blog post
-* also spit out the point sets in progressive order
-
 * give will 10 point sets from this, that are the first 32 in the sequence
+* Maybe will should take all these points as candidates and pick the best 32 of em??
 
 NOTE:
 * just because BNOT is a great blue noise SET, doesn't mean that turning it into a blue noise sequence would make it better than other blue noise sequences.
+
+* algorithm to "find the point that has the closest neighbor and make that be the next point in the reverse sequence" made holes in the blue noise. it was not very nicely progressive.
 * a better algorithm might be to make voronoi cells, and remove the point with the smallest cell?
 * a better algorithm is probably to do MBC forward... pick a starting one at random, and then choose whichever is farthest from existing points
+ * which point to start with though? maybe should try em all? how to evaluate which one was the best to start with though? evaluating blue noise quality objectively is hard.
+* Maybe will should take all these points as candidates and pick the best 32 of em??
+! doing void and cluster method... energy between points. remove the point with the highest energy.
 
 */
