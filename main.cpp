@@ -29,17 +29,19 @@ float DistanceWrap(const float2& A, const float2& B)
 
 void DrawPointsAsImage(const std::vector<float2>& points, int pointCount, const char* fileName)
 {
-	std::vector<unsigned char> pixels(c_imageSize * c_imageSize, 255);
+	std::vector<unsigned char> pixels(c_imageSize * c_imageSize * 3, 255);
 
 	for (int pointIndex = 0; pointIndex < pointCount; ++pointIndex)
 	{
 		int x = std::min(int(points[pointIndex][0] * float(c_imageSize)), c_imageSize - 1);
 		int y = std::min(int(points[pointIndex][1] * float(c_imageSize)), c_imageSize - 1);
 
-		pixels[y * c_imageSize + x] = 0;
+		pixels[(y * c_imageSize + x) * 3 + 0] = (pointIndex + 1 == pointCount) ? 255 : 0;
+		pixels[(y * c_imageSize + x) * 3 + 1] = 0;
+		pixels[(y * c_imageSize + x) * 3 + 2] = 0;
 	}
 
-	stbi_write_png(fileName, c_imageSize, c_imageSize, 1, pixels.data(), 0);
+	stbi_write_png(fileName, c_imageSize, c_imageSize, 3, pixels.data(), 0);
 }
 
 int main(int argc, char** argv)
